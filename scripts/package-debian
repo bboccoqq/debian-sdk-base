@@ -51,6 +51,15 @@ augment_sdk() {
 
 fix_runtime() {
 	rt_dir=${1}
+    # handle links /usr/bin/something -> /bin/something
+    pushd ${rt_dir}/usr/bin
+    for i in *; do
+        if [ -L $i ]; then
+            target=$(readlink $i)
+            [ ${target} = /bin/${i} ] && { echo "must remove ${i} -> ${target}"; sudo rm ${i}; }
+        fi
+    done
+    popd
 	sudo cp -ra ${1}/bin/* ${1}/usr/bin/				\
 	&& sudo cp -ra ${1}/lib/* ${1}/usr/lib/				\
 	&& sudo cp -ra ${1}/lib64 ${1}/usr/
